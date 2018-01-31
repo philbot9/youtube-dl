@@ -728,6 +728,10 @@ def parseOpts(overrideArguments=None):
         action='store_true', dest='writedescription', default=False,
         help='Write video description to a .description file')
     filesystem.add_option(
+        '--write-comments',
+        action='store_true', dest='writecomments', default=False,
+        help='Write video comments to a CSV file')
+    filesystem.add_option(
         '--write-info-json',
         action='store_true', dest='writeinfojson', default=False,
         help='Write video metadata to a .info.json file')

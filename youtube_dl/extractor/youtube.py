@@ -10,6 +10,7 @@ import random
 import re
 import time
 import traceback
+import subprocess
 
 from .common import InfoExtractor, SearchInfoExtractor
 from ..jsinterp import JSInterpreter
@@ -1424,6 +1425,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         url = 'https://www.youtube.com/annotations_invideo?features=1&legacy=1&video_id=%s' % video_id
         return self._download_webpage(url, video_id, note='Searching for annotations.', errnote='Unable to download video annotations.')
 
+    def _extract_comments(self, video_id):
+        p = subprocess.Popen('youtube-comment-scraper -f csv ' + video_id, stdout=subprocess.PIPE, shell=True)
+        out, err = p.communicate()
+        return out.decode('utf-8')
+
     @staticmethod
     def _extract_chapters(description, duration):
         if not description:
@@ -1811,6 +1817,16 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if self._downloader.params.get('writeannotations', False):
             video_annotations = self._extract_annotations(video_id)
 
+        # comments
+        video_comments = None
+        if self._downloader.params.get('writecomments', False):
+            self.to_screen('%s: Scraping video comments' % video_id)
+            try:
+                video_comments = self._extract_comments(video_id)
+            except (OSError, IOError):
+                self.report_warning('%s: Failed to scrape comments' % video_id)
+                video_comments = None
+
         chapters = self._extract_chapters(description_original, video_duration)
 
         if 'conn' in video_info and video_info['conn'][0].startswith('rtmp'):
@@ -2044,6 +2060,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             'duration': video_duration,
             'age_limit': 18 if age_gate else 0,
             'annotations': video_annotations,
+            'comments': video_comments,
             'chapters': chapters,
             'webpage_url': proto + '://www.youtube.com/watch?v=%s' % video_id,
             'view_count': view_count,

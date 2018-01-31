@@ -1774,6 +1774,21 @@ class YoutubeDL(object):
                     self.report_error('Cannot write annotations file: ' + annofn)
                     return
 
+        if self.params.get('writecomments', False):
+            commentsfn = replace_extension(filename, 'comments.csv', info_dict.get('ext'))
+            if self.params.get('nooverwrites', False) and os.path.exists(encodeFilename(commentsfn)):
+                self.to_screen('[info] Comments file is already present')
+            elif info_dict.get('comments') is None:
+                self.report_warning('There are not comments to write.')
+            else:
+                try:
+                    self.to_screen('[info] Scraping comments to: ' + commentsfn)
+                    with io.open(encodeFilename(commentsfn), 'w', encoding='utf-8') as descfile:
+                        descfile.write(info_dict['comments'])
+                except (OSError, IOError):
+                    self.report_error('Cannot write comments file ' + commentsfn)
+                    return
+
         subtitles_are_requested = any([self.params.get('writesubtitles', False),
                                        self.params.get('writeautomaticsub')])
 

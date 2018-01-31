@@ -359,6 +359,7 @@ def _real_main(argv=None):
         'nopart': opts.nopart,
         'updatetime': opts.updatetime,
         'writedescription': opts.writedescription,
+        'writecomments': opts.writecomments,
         'writeannotations': opts.writeannotations,
         'writeinfojson': opts.writeinfojson,
         'writethumbnail': opts.writethumbnail,
